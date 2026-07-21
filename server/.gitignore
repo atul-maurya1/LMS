@@ -1,0 +1,71 @@
+# ==========================================
+# 1. Environment Variables & Secrets (CRITICAL)
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.txt
+
+# ==========================================
+# 2. Dependencies & Package Managers
+# ==========================================
+node_modules/
+jspm_packages/
+.pnp
+.pnp.js
+.venv/
+venv/
+env/
+lib/
+lib64/
+
+# ==========================================
+# 3. Build Outputs, Artifacts & Caches
+# ==========================================
+dist/
+build/
+out/
+target/
+*.exe
+*.dll
+*.so
+*.dmg
+.eslintcache
+.parcel-cache
+.turbo/
+.next/
+.nuxt/
+
+# ==========================================
+# 4. Logs and Databases
+# ==========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.sqlite
+*.db
+
+# ==========================================
+# 5. OS Specific Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# ==========================================
+# 6. IDEs and Editors
+# ==========================================
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
