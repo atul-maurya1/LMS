@@ -1,8 +1,10 @@
 import {Course} from '../models/course.model.js'
 import AppError from '../utils/AppError.utils.js'
 import fs from 'fs'
-import cloudinary from 'cloudinary'
+import {uploadFile} from '../config/cloudinary.js'
 import asyncHandler from '../utils/asyncHandler.js'
+import User from '../models/user.model.js'
+import {Lecture} from '../models/lecture.model.js'
 
 	// only INSTRACTOR
 export const createCourse = asyncHandler(async (req, res) => {
@@ -37,9 +39,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 		throw new AppError("please choose course cover image ", 400);
 	}
 
-	const result = await cloudinary.uploader.upload(req.file.path, {
-		folder: "lms",
-	});
+	const result = await uploadFile(req.file.path)
 
 	const thumbnail = {
 		public_id: result.public_id,
@@ -57,7 +57,14 @@ export const createCourse = asyncHandler(async (req, res) => {
 		instructor,
     isPublished
 	});
+
+  await User.findByIdAndUpdate(instructor, {
+    $push: {createdCourse: course._id}
+  })
  
+//  const user = await User.findById(instructor)
+//  user.createdCourse.push(course._id)
+//  await user.save()
 
 	return res.status(201).json({
 		success: true,
@@ -110,6 +117,53 @@ export const deleteCourse = asyncHandler(async(req, res) => {
     data: course
   })
   
+})
+
+
+// add lecture
+export const addLecture = asyncHandler(async(req, res) => {
+   
+  const courseId = req.params.id
+   const course = await Course.findById(courseId)
+   
+   if(!course){
+     throw new AppError("course not found ", 404)
+   }
+
+   const {title, description, isPreview} = req.body
+   if(!title || !description){
+    throw new AppError("title and description are required ", 400)
+   }
+
+   if(!req.file){
+    throw new apiError("please choose lecture video")
+   }
+   
+   const result = await uploadFile(req.file.path)
+   
+   const lecture = await Lecture.create({
+       title,
+       description,
+       isPreview,
+       videoUrl: result?.secure_url,
+       publicId: result?.public_id,
+       duration: result?.duration,
+       order: course.lectures.length + 1
+   })
+   if(!lecture){
+    throw new AppError("Error while adding lecture ", 400)
+   }
+   course.lectures.push(lecture._id)
+   course.totalDuration +=result?.duration
+   await course.save({validaitonBeforeSave: false})
+
+  return res.status(200).json({
+    success: true,
+    message: "lecture added seccussfully",
+    data: lecture
+  })
+  
+
 })
 
 

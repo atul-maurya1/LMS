@@ -67,7 +67,7 @@ const courseSchema = new mongoose.Schema({
     totalLectures:{
         type:Number,
         default:0
-    }
+    } 
 }, {
     timestamps:true,
     toJSON:{virtuals:true},

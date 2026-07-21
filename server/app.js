@@ -3,12 +3,12 @@ import 'dotenv/config'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
-import cloudinary from 'cloudinary'
 import rateLimit from 'express'
 import halmet from 'helmet'
 import hpp from 'hpp'
 
 
+import connectCloudinary from './config/cloudinary.js'
 import connectDb from './config/dbConfig.js'
 import authRoutes from './routes/auth.routes.js'
 import courseRoutes from './routes/course.routes.js'
@@ -34,7 +34,7 @@ app.use(morgan('dev')) // middleware that log the http request
 
 
 connectDb()
-
+connectCloudinary()
 // body parser
 app.use(express.urlencoded({ extended: true, limit: "15kb" }));
 app.use(express.json({limit: '15kb'}))
@@ -52,12 +52,6 @@ app.use(cors({
     //     "Origin"
     // ]
 }))
-
-cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-})
 
 
 // routes of 3 modules

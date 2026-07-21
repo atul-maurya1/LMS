@@ -57,16 +57,19 @@ const userSchema = new mongoose.Schema(
 				},
 			},
 		],
-		createdCourse: {
+		createdCourse: [
+			{
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Course",
-		},
+		}
+	],
 		lastActive: {
 			type: Date,
 			default: Date.now,
 		},
         refreshToken: {
 			type: String,
+			select: false
 		},
 
 		forgotPasswordToken: "String",
@@ -91,7 +94,11 @@ userSchema.methods.updateLastActive = function(){
 }
 
 userSchema.virtual("totalEnrolledCourses").get(function(){
-    this.enrolledCourse?.length
+    return this.enrolledCourse?.length
+})
+
+userSchema.virtual("totalCourses").get(function(){
+	return this.createdCourse?.length
 })
 
 userSchema.methods.generateAccessToken = function () {

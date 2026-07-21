@@ -39,12 +39,12 @@ const lectureSchema = new mongoose.Schema({
 });
 
 // Format duration before saving
-lectureSchema.pre('save', function(next) {
+lectureSchema.pre('save', function() {
     if (this.duration) {
         // Round duration to 2 decimal places
         this.duration = Math.round(this.duration * 100) / 100;
     }
-    next();
+   
 });
 
 export const Lecture = mongoose.model('Lecture', lectureSchema);
