@@ -79,6 +79,10 @@ courseSchema.virtual('averageRating').get(function(){
     return 0; // Placeholder until review system is implemented
 });
 
+courseSchema.virtual("totalEnrolledStudents").get(function(){
+    return this.enrolledStudents?.length
+})
+
 // Update total lectures count when lectures are modified
 courseSchema.pre('save', function(){
     if(this.lectures){

@@ -119,6 +119,28 @@ export const deleteCourse = asyncHandler(async(req, res) => {
   
 })
 
+// view course by id may be without login
+export const getCourseDetails = asyncHandler(async(req, res) => {
+   const courseId = req.params.id
+   const course = await Course.findById(courseId).select("-enrolledStudents -lectures").populate({
+    path: "instructor",
+    select: "fullName bio avatar" 
+  })
+   if(!course){
+    throw new AppError("Course not found ", 404)
+   }
+ 
+   return res.status(200).json({
+    success: true,
+    message: "Course view",
+    data: course,
+    enrolledStudents: course.enrolledStudents || 0,
+    //averageRating
+   })
+
+
+})
+
 
 // add lecture
 export const addLecture = asyncHandler(async(req, res) => {
