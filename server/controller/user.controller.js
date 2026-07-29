@@ -94,8 +94,38 @@ export const coursesList = asyncHandler(async (req, res) => {
 			course,
 			limit,
 			page,
-      totalCourse: course?.length,
-      totalPage: Math.ceil(totalCourse / limit)
+			totalCourse: course?.length,
+			totalPage: Math.ceil(totalCourse / limit),
 		},
 	});
+});
+
+// view course by id may be without login
+export const getCourseDetails = asyncHandler(async (req, res) => {
+	const courseId = req.params.id;
+	const course = await Course.findById(courseId)
+		.select("-lectures")
+		.populate({
+			path: "instructor",
+			select: "fullName bio avatar",
+		});
+	if (!course) {
+		throw new AppError("Course not found ", 404);
+	}
+
+	return res.status(200).json({
+		success: true,
+		message: "Course view",
+		data: {
+			course,
+			totalEnrolledStudents: course.enrolledStudents || 0,
+		},
+		//averageRating
+	});
+});
+
+//student
+export const getEnrolledCourses = asyncHandler(async (req, res) => {
+	const userId = req.user.id;
+	const course = await User.findById(userId).populate(enrolledCourse);
 });
