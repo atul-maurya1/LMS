@@ -188,7 +188,22 @@ export const addLecture = asyncHandler(async(req, res) => {
 
 })
 
+export const deleteLecture = asyncHandler(async(req, res) => {
+   const {lectureId} = req.body || req.params
+   const userId = req.user._id
 
+   const lecture = await Lecture.findByIdAndDelete({_id: lectureId})
+   if(!lecture){
+    throw new AppError("problem in lecture detetion ", 400)
+   }
+
+   return res.status(200).json({
+    success: true,
+    message: "lecture deleted successfully",
+    data: lecture
+   })
+
+})
 
 
 

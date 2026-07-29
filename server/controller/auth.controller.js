@@ -130,7 +130,7 @@ export const logout = asyncHandler( async (req , res) => {
 
 
 export const forgotPassword = async (req, res , next) => {
-  console.log(req.body)
+ // console.log(req.body)
    const {email} = req.body
    if(!email) {
       return next(new AppError('email is required', 400))
@@ -143,13 +143,8 @@ export const forgotPassword = async (req, res , next) => {
    }
 
    const resetToken = await user.generatePasswordResetToken()
-    console.log("toekn is1: ", resetToken); 
-   await user.save({ validateBeforeSave: false });  // save without changes
+
    const resetPasswordURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`
-
-  
-  
-
 
      const message = `
       <h2>Password Reset</h2>
@@ -183,7 +178,6 @@ export const resetPassword = async (req, res, next) => {
       const {resetToken} = req.params
       console.log("token is: ",  req.params.token)
 
-
       const {password} = req.body
       if(!password){
          return next(new AppError('Please create new password', 400))
@@ -207,7 +201,7 @@ export const resetPassword = async (req, res, next) => {
       user.password = password
       user.forgotPasswordToken = undefined
       user.forgotPasswordExpiry =undefined
-      user.save()
+      await user.save({validateBeforeSave: false})
 
       res.status(200).json({
          success: true,
@@ -237,7 +231,7 @@ export const changePassword = async (req, res, next) => {
    }
 
    user.password = newPassword
-   await user.save()
+   await user.save({validateBeforeSave: false})
    user.password = undefined
 
    res.status(200).json({
