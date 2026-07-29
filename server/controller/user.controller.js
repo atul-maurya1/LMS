@@ -124,6 +124,38 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
 	});
 });
 
+export const getCourseLectures = asyncHandler(async(req, res) => {
+
+  const course = await Course.findById(req.params.id).populate({
+    path: "lectures",
+    select: "title description videoUrl duration isPreview order"
+  }).sort({order: 1})
+
+  if(!course){
+    throw new AppError("Course not found ", 404)
+  }
+
+  const isEnrolled = course.enrolledStudents.includes(req.user.id)
+  const isInstructor = course.instructor.toString() === req.user.id
+
+  let lectures = course.lectures
+  if(!isEnrolled && !isInstructor){
+    // if student not enrolled and instructor is not them show only some lec. which is preview
+    lectures = lectures.filter((lec) => lec.isPreview)
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "lecture fetched successfully",
+    data: {
+      lectures,
+      isEnrolled,
+      isInstructor
+    }
+  })
+  
+})
+
 //student
 export const getEnrolledCourses = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
