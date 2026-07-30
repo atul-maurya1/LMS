@@ -5,14 +5,13 @@ import { uploadFile } from "../config/cloudinary.js";
 export const getProfile = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
 	const role = req.user.role;
-	const user = await User.findById(userId).populate("createdCourse");
+	const user = await User.findById(userId).select("-password")
+
 	res.status(200).json({
 		success: true,
 		message: "User details",
 		data: {
-			user,
-			totalEnrolledCourses: user.totalEnrolledCourses || 0,
-			totalCreatedCourse: user.totalCourses || 0,
+			user
 		},
 	});
 });
@@ -160,4 +159,39 @@ export const getCourseLectures = asyncHandler(async(req, res) => {
 export const getEnrolledCourses = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
 	const course = await User.findById(userId).populate(enrolledCourse);
+	
+	let enrolledCourse = course?.enrolledCourse
+	if(enrolledCourse.length === 0){
+		throw new AppError("No Courses ", 404)
+	}
+
+	return res.status(200).json({
+		success: true,
+		message: "Enrolled course by students", 
+		data:{
+			enrolledCourse,
+			totalEnrolledCourses: enrolledCourse.length
+		}
+	})
+
 });
+
+
+export const getMyCreatedCourses = asyncHandler(async(req, res) => {
+	const myCourses = Course.find({instructor: req.user.id}).populate({
+		paht: "enrolledStudents",
+		select: "fullName, email, avatar"
+	})
+	if(myCourses.length === 0){
+		throw new AppError("No Course Created Yet", 404)
+	}
+
+	return res.status(200).json({
+		success: true,
+		message:" my created course fetched successfully",
+		data: {
+			myCourses,
+			totalMyCourses: myCourses.length || 0
+		}
+	})
+})
