@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
 		},
 		bio: {
 			type: String,
-			minLength: [100, "Only 100 character allowed"],
+			minLength: [100, "Only 100 character allowed"], // PROBLEM: minLength 100 for a bio is extremely high — this means bio MUST be at least 100 characters. The error message "Only 100 character allowed" is misleading, it suggests a max limit but this is actually a minimum. Likely should be `maxLength: 100` instead.
 		},
 
 		password: {
@@ -72,7 +72,7 @@ const userSchema = new mongoose.Schema(
 			select: false
 		},
 
-		forgotPasswordToken: "String",
+		forgotPasswordToken: "String", // PROBLEM: This should be `String` (the constructor), NOT `"String"` (a literal string). Writing `"String"` as a string literal defines the type as String by Mongoose shorthand, so it accidentally works, but it's incorrect syntax and confusing. Should be `forgotPasswordToken: String` or `{ type: String }`.
 		forgotPasswordExpiry: Date,
 	},
 	{ timestamps: true },
@@ -80,7 +80,7 @@ const userSchema = new mongoose.Schema(
 
 
 
-userSchema.pre("save", async function () {
+userSchema.pre("save", async function () { // PROBLEM: Missing `next` parameter. In Mongoose pre-save hooks, you should call `next()` at the end or accept `next` as parameter. Without it, the save operation may hang in some Mongoose versions. Should be: `async function(next) { ... next() }`
 	if (!this.isModified("password")) {
 		return;
 	}

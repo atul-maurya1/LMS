@@ -38,7 +38,7 @@ const courseProgressSchema = new mongoose.Schema({
 //calculate course completion
 courseProgressSchema.pre('save', function(next){
     if(this.lectureProgress.length > 0){
-        const completedLectures = this.lectureProgress.filter(lp => lp.isCompleted).length
+        const completedLectures = this.lectureProgress.filter(lp => lp.isCompleted).length // PROBLEM: `this.lectureProgress` contains ObjectId references, NOT populated documents. `lp.isCompleted` will always be `undefined` on an ObjectId, so `completedLectures` will always be 0. You need to populate lectureProgress first or query LectureProgress separately.
         this.completionPercentage = Math.round((completedLectures / this.lectureProgress.length) * 100)
         this.isCompleted = this.completionPercentage === 100
     }

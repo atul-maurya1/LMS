@@ -41,6 +41,6 @@ lectureProgressSchema.index(
     { unique: true }
 );
 
-const LectureProgress = new mongoose.model('LectureProgress', lectureProgressSchema)
+const LectureProgress = new mongoose.model('LectureProgress', lectureProgressSchema) // PROBLEM: `new` keyword is unnecessary with `mongoose.model()`. It's a factory function, not a constructor. While it works due to JS behavior, it triggers a deprecation warning in recent Mongoose versions. Should be `mongoose.model('LectureProgress', lectureProgressSchema)`.
 
 export default LectureProgress
