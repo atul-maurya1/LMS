@@ -12,6 +12,7 @@ import connectCloudinary from './config/cloudinary.js'
 import connectDb from './config/dbConfig.js'
 import authRoutes from './routes/auth.routes.js'
 import courseRoutes from './routes/course.routes.js'
+import courseProgressRoutes from './routes/courseProgress.routes.js'
 import {errorMiddleware} from './middlewares/error.middlewares.js'
 import userRoutes from './routes/user.routes.js'
 
@@ -58,6 +59,7 @@ app.use(cors({
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRoutes)
 app.use('/api/v1/course', courseRoutes)
+app.use('/api/v1/progress', courseProgressRoutes)
 
      
 app.use( (req, res) => {

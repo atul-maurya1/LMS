@@ -105,7 +105,7 @@ export const updateCourse = asyncHandler(async(req, res) => {
 
 // only INSTRACTOR
 export const deleteCourse = asyncHandler(async(req, res) => {
-  const courseId = req.params
+  const courseId = req.params.id
 
   const course = await Course.findByIdAndDelete(courseId)
   if(course){
@@ -167,7 +167,7 @@ export const addLecture = asyncHandler(async(req, res) => {
 })
 
 export const deleteLecture = asyncHandler(async(req, res) => {
-   const {lectureId} = req.body || req.params
+   const {lectureId} = req.body.id || req.params.id
    const userId = req.user._id
 
    const lecture = await Lecture.findByIdAndDelete({_id: lectureId})

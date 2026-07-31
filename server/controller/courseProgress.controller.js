@@ -1,17 +1,16 @@
 import User from "../models/user.model.js";
-import Course from '../models/course.model.js'
+import {Course} from '../models/course.model.js'
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError from '../utils/AppError.utils.js'
 import LectureProgress from '../models/lectureProgress.model.js'
 import CourseProgress from '../models/courseProgress.js'
-import Course from '../models/course.model.js'
 
 export const lectureProgress = asyncHandler(async (req, res) => {
     const lectureId = req.params.id || req.body.id
     const courseId = req.params.id
     const userId = req.user.id
 
-    const {isCompleted} = req.body
+    const {} = req.body
 
     let lectureProgress =  await LectureProgress.findOne({
         lecture: lectureId,
@@ -40,7 +39,7 @@ export const lectureProgress = asyncHandler(async (req, res) => {
       let progress =  await CourseProgress.create({
             user: userId,
             course: courseId,
-            isCompleted = false
+            isCompleted: false
         })
        progress.lectureProgress.push(lectureProgress)
        await progress.save()
@@ -71,9 +70,9 @@ export const lectureProgress = asyncHandler(async (req, res) => {
     const totalLectures = course?.totalLectures || 0
 
     const totalLectureCompleted = courseProgress?.lectureProgress.filter((lp) => lp.isCompleted === true).length
-    const completionPercentage =  Math.round(((totalLectureCompleted / totalLectures) * 100))
+    const courseCompletionPercentage =  Math.round(((totalLectureCompleted / totalLectures) * 100))
 
-    courseProgress?.completionPercentage = completionPercentage
+    courseProgress.completionPercentage  = courseCompletionPercentage
     await courseProgress.save()
 
     return res.status(200).json({
