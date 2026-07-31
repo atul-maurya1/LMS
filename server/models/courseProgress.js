@@ -1,27 +1,5 @@
 import mongoose from "mongoose"
 
-
-const lectureProgressSchema = new mongoose.Schema({
-    lecture: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Lecture',
-        required: [true, 'Lecutre reference is required']
-    },
-    isCompleted: {
-        type: Boolean,
-        default: false
-    },
-    watchTime : {
-        type: Number,
-        default: 0
-    },
-    lastWatched: {
-        type: Date,
-        default: Date.now
-    }
-})
-
-
 const courseProgressSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -44,7 +22,12 @@ const courseProgressSchema = new mongoose.Schema({
         min: 0,
         max: 100
     },
-    lectureProgress: [lectureProgressSchema],
+    lectureProgress: [
+        {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LectureProgress",
+        }
+    ],
     lastAccessed: {
         type: Date,
         default: Date.now,
@@ -64,7 +47,9 @@ courseProgressSchema.pre('save', function(next){
 //update last accessed
 courseProgressSchema.methods.updateLastAccessed = function(){
     this.lastAccessed = Date.now()
-    return this.save({ValidateBeforeSave : false})
+    return this.save({validateBeforeSave : false})
 }
 
-export const CourseProgress  = mongoose.model('CourseProgress', courseProgressSchema)
+const CourseProgress  = mongoose.model('CourseProgress', courseProgressSchema)
+
+export default CourseProgress

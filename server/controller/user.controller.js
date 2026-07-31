@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadFile } from "../config/cloudinary.js";
+import AppError from '../utils/AppError.utils.js'
+
 
 export const getProfile = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
