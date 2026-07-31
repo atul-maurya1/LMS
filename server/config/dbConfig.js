@@ -121,16 +121,17 @@ import mongoose from "mongoose";
 
 
 
-const MONGO_URL = process.env.MONGO_URL
+const MONGO_URL = process.env.MONGO_URL 
+if (!MONGO_URL) throw new Error('MONGO_URL is not defined')
 
-const connectDb =  ()=>{
+const connectDb =  () => {
    try{ 
-       mongoose.connect(MONGO_URL)
+       mongoose.connect(MONGO_URL) 
       .then((conn) => {
          console.log(`db is connect ${conn.connection.host}`)
         })
       .catch((e) => {
-           console.log('error while connecting to db ', e)
+           console.log('error while connecting to db ', e) 
         })
 
     }catch(e){

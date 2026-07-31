@@ -19,12 +19,12 @@ const userSchema = new mongoose.Schema(
 			trim: true,
 			lowercase: true,
 			required: [true, "email is required"],
-			match: [ /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, "Please provide a valid email"],
+			match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, "Please provide a valid email"],
 			index: true,
 		},
 		bio: {
 			type: String,
-			minLength: [100, "Only 100 character allowed"], // PROBLEM: minLength 100 for a bio is extremely high — this means bio MUST be at least 100 characters. The error message "Only 100 character allowed" is misleading, it suggests a max limit but this is actually a minimum. Likely should be `maxLength: 100` instead.
+			maxLength: [100, "Only 100 character allowed"],
 		},
 
 		password: {
@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema(
 			enum: ["STUDENT", "INSTRUCTOR", "ADMIN"],
 			default: "STUDENT",
 		},
-		
+
 		enrolledCourse: [
 			{
 				course: {
@@ -59,20 +59,20 @@ const userSchema = new mongoose.Schema(
 		],
 		createdCourse: [
 			{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "Course",
-		}
-	],
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Course",
+			}
+		],
 		lastActive: {
 			type: Date,
 			default: Date.now,
 		},
-        refreshToken: {
+		refreshToken: {
 			type: String,
 			select: false
 		},
 
-		forgotPasswordToken: "String", // PROBLEM: This should be `String` (the constructor), NOT `"String"` (a literal string). Writing `"String"` as a string literal defines the type as String by Mongoose shorthand, so it accidentally works, but it's incorrect syntax and confusing. Should be `forgotPasswordToken: String` or `{ type: String }`.
+		forgotPasswordToken: String,
 		forgotPasswordExpiry: Date,
 	},
 	{ timestamps: true },
@@ -80,7 +80,7 @@ const userSchema = new mongoose.Schema(
 
 
 
-userSchema.pre("save", async function () { // PROBLEM: Missing `next` parameter. In Mongoose pre-save hooks, you should call `next()` at the end or accept `next` as parameter. Without it, the save operation may hang in some Mongoose versions. Should be: `async function(next) { ... next() }`
+userSchema.pre("save", async function () { 
 	if (!this.isModified("password")) {
 		return;
 	}
@@ -88,16 +88,16 @@ userSchema.pre("save", async function () { // PROBLEM: Missing `next` parameter.
 });
 
 
-userSchema.methods.updateLastActive = function(){
-    this.lastActive = Date.now()
-     return this.save({ validateBeforeSave: false });
+userSchema.methods.updateLastActive = function () {
+	this.lastActive = Date.now()
+	return this.save({ validateBeforeSave: false });
 }
 
-userSchema.virtual("totalEnrolledCourses").get(function(){
-    return this.enrolledCourse?.length
+userSchema.virtual("totalEnrolledCourses").get(function () {
+	return this.enrolledCourse?.length
 })
 
-userSchema.virtual("totalCourses").get(function(){
+userSchema.virtual("totalCourses").get(function () {
 	return this.createdCourse?.length
 })
 
@@ -113,16 +113,16 @@ userSchema.methods.generateAccessToken = function () {
 	);
 };
 
-userSchema.methods.generateRefreshToken = function(){
-     return jwt.sign(
-        {
-            id: this._id,
-            email: this.email,
+userSchema.methods.generateRefreshToken = function () {
+	return jwt.sign(
+		{
+			id: this._id,
+			email: this.email,
 			role: this.role,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "7d" }
-     )
+		},
+		process.env.REFRESH_TOKEN_SECRET,
+		{ expiresIn: "7d" }
+	)
 }
 
 userSchema.methods.generatePasswordResetToken = function () {

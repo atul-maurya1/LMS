@@ -22,8 +22,7 @@ export const uploadFile = async (localFile) => {
             resource_type: "auto",
             folder: "lms"
         })
-        fs.unlink(localFile)
-        return result
+        fs.unlink(localFile) 
 
     }catch(e){
          console.log("error while uploading file ", e)

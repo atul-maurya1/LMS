@@ -6,6 +6,6 @@ export const errorMiddleware = (err, req, res, next) => {
    
         success: false,
         message: err.message,
-        stack: err.stack // PROBLEM: Stack trace is exposed in ALL environments including production. This is a security risk — attackers can see internal file paths and code structure. Should only include stack in development: `stack: process.env.NODE_ENV === 'development' ? err.stack : undefined`
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
     })
 }

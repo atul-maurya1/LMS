@@ -93,15 +93,14 @@ export const login = asyncHandler(async (req, res) => {
      throw new AppError('Incorrect password', 400)
    }
 
-   const loggedInUser = await User.findById(user._id).select("-password, -refreshToken") // PROBLEM: Wrong `.select()` syntax. Comma-separated exclusions inside a single string don't work in Mongoose. Should be `.select("-password -refreshToken")` (space-separated, no comma). Currently this will NOT properly exclude refreshToken.
-   await loggedInUser.updateLastActive()
+   const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
     const {accessToken, refreshToken} = await generateAccessTokenAndRefreshToken(user._id)
      
      res.cookie('refreshToken', refreshToken, cookieOption )
      res.cookie('accessToken', accessToken, cookieOption)
 
-     res.status(201).json({
+     res.status(200).json({
         success: true,
         message: "user login successfully",
         user: loggedInUser,
@@ -142,7 +141,7 @@ export const forgotPassword = async (req, res , next) => {
       return next (new AppError('email is not registered', 400))
    }
 
-   const resetToken = await user.generatePasswordResetToken() // PROBLEM: `generatePasswordResetToken()` is NOT async (it doesn't return a Promise), so `await` here is unnecessary. More critically, after calling this method, `user.forgotPasswordToken` and `user.forgotPasswordExpiry` are set on the document but NEVER SAVED to the database. A `await user.save()` call is missing here. Without it, the reset token is never persisted and password reset will always fail.
+   const resetToken = await user.generatePasswordResetToken() // ?
 
    const resetPasswordURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`
 
@@ -176,7 +175,7 @@ export const forgotPassword = async (req, res , next) => {
 
 export const resetPassword = async (req, res, next) => {
       const {resetToken} = req.params
-      console.log("token is: ",  req.params.token) // PROBLEM: `req.params.token` does not exist! The route param is named `resetToken` (from line 178), so this should be `req.params.resetToken`. This will always log `undefined`.
+      // console.log("token is: ",  req.params.token) 
 
       const {password} = req.body
       if(!password){
@@ -201,7 +200,7 @@ export const resetPassword = async (req, res, next) => {
       user.password = password
       user.forgotPasswordToken = undefined
       user.forgotPasswordExpiry =undefined
-      await user.save({validateBeforeSave: false}) // PROBLEM: `validateBeforeSave: false` skips the pre-save hook, which means the new password will be stored in PLAIN TEXT (not hashed)! Should be `await user.save()` to trigger the pre-save password hashing hook.
+      await user.save() 
 
       res.status(200).json({
          success: true,
@@ -231,7 +230,7 @@ export const changePassword = async (req, res, next) => {
    }
 
    user.password = newPassword
-   await user.save({validateBeforeSave: false}) // PROBLEM: Same issue as resetPassword — `validateBeforeSave: false` skips pre-save hook so the new password is saved in PLAIN TEXT without hashing. Should be `await user.save()` to trigger bcrypt hashing.
+   await user.save() 
    user.password = undefined
 
    res.status(200).json({

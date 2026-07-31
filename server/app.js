@@ -3,8 +3,8 @@ import 'dotenv/config'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
-import rateLimit from 'express' // PROBLEM: Wrong import! Should be `import rateLimit from 'express-rate-limit'`. Currently importing express again, so `rateLimit({...})` will create another express app, NOT a rate limiter. This will crash or behave unexpectedly.
-import halmet from 'helmet' // PROBLEM: Typo in variable name — should be `helmet` not `halmet`. Works but misleading/confusing. Also the actual package is 'helmet' so this only works by coincidence of the package name being correct.
+import rateLimit from "express-rate-limit" 
+import helmet from 'helmet' 
 import hpp from 'hpp'
 
 
@@ -13,7 +13,7 @@ import connectDb from './config/dbConfig.js'
 import authRoutes from './routes/auth.routes.js'
 import courseRoutes from './routes/course.routes.js'
 import courseProgressRoutes from './routes/courseProgress.routes.js'
-import {errorMiddleware} from './middlewares/error.middlewares.js'
+import { errorMiddleware } from './middlewares/error.middlewares.js'
 import userRoutes from './routes/user.routes.js'
 
 const app = express()
@@ -26,7 +26,7 @@ const limiter = rateLimit({
 })
 
 // Security Middleware
-app.use(halmet()) // PROBLEM: Using misspelled variable `halmet` — matches the typo on import line 7. Should be `helmet()`.
+app.use(helmet()) 
 app.use(hpp())
 app.use('/api', limiter)
 
@@ -38,12 +38,12 @@ connectDb()
 connectCloudinary()
 // body parser
 app.use(express.urlencoded({ extended: true, limit: "15kb" }));
-app.use(express.json({limit: '15kb'}))
+app.use(express.json({ limit: '15kb' }))
 app.use(cookieParser())
 
 app.use(cors({
     origin: [process.env.FRONTEND_URL],
-    credentails: true, // PROBLEM: Typo! Should be `credentials: true`. Because of this typo, cookies/auth headers will NOT be sent cross-origin. This will break authentication for frontend requests.
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
     // allowHeaders: [
     //     "Content-Type",
@@ -61,14 +61,13 @@ app.use('/api/v1/user', userRoutes)
 app.use('/api/v1/course', courseRoutes)
 app.use('/api/v1/progress', courseProgressRoutes)
 
-     
-app.use( (req, res) => { // PROBLEM: This 404 handler does NOT have `next` parameter, so Express treats it as a regular middleware, NOT an error handler. But the bigger issue is: this middleware catches ALL unmatched requests and sends a response, so the `errorMiddleware` below will NEVER be reached for thrown errors. The 404 handler should be placed AFTER error middleware, OR errors should be handled before this catch-all.
+app.use(errorMiddleware)
+
+app.use((req, res ,next) => { 
     res.status(404).json({
         status: "error",
         message: "OOPs ! 404 page not found"
     })
 })
- 
-app.use(errorMiddleware) // PROBLEM: This error middleware is placed AFTER the 404 catch-all above. Since the 404 handler catches everything and sends a response, this error middleware will never execute for actual errors. It should be placed BEFORE the 404 handler, or the 404 handler should call next() for non-404 cases.
 
 export default app

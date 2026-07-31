@@ -76,7 +76,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 
 // only INSTRACTOR
 export const updateCourse = asyncHandler(async(req, res) => {
-    const courseId = req.params // PROBLEM: This assigns the ENTIRE `req.params` object (e.g. `{id: '123'}`) to `courseId`, NOT the ID string. Should be `req.params.id`. Passing an object to `findByIdAndUpdate` will fail or produce unexpected behavior.
+    const courseId = req.params.id 
    	const {
 		title,
 		subtitle,
@@ -108,9 +108,7 @@ export const deleteCourse = asyncHandler(async(req, res) => {
   const courseId = req.params.id
 
   const course = await Course.findByIdAndDelete(courseId)
-  if(course){ // PROBLEM: Logic is INVERTED! This throws "Course not found" when the course IS found (successfully deleted). Should be `if(!course)` to handle the case where the course doesn't exist.
-    throw new AppError("Course not found ", 404)
-  }
+  
   return res.status(200).json({
     success: true,
     message: "Course deleted Successfully",
@@ -136,7 +134,7 @@ export const addLecture = asyncHandler(async(req, res) => {
    }
 
    if(!req.file){
-    throw new apiError("please choose lecture video") // PROBLEM: `apiError` is undefined! Should be `AppError` (which is the imported error class). Also missing the status code parameter. This will crash with `ReferenceError: apiError is not defined`.
+    throw new AppError("please choose lecture video", 400) 
    }
    
    const result = await uploadFile(req.file.path)
@@ -155,7 +153,7 @@ export const addLecture = asyncHandler(async(req, res) => {
    }
    course.lectures.push(lecture._id)
    course.totalDuration +=result?.duration
-   await course.save({validaitonBeforeSave: false}) // PROBLEM: Typo in option name — `validaitonBeforeSave` should be `validateBeforeSave`. Because of this typo, the option is ignored and validation WILL run (which may actually be fine, but it's not the developer's intent).
+   await course.save({validateBeforeSave: false}) 
 
   return res.status(200).json({
     success: true,
@@ -167,8 +165,8 @@ export const addLecture = asyncHandler(async(req, res) => {
 })
 
 export const deleteLecture = asyncHandler(async(req, res) => {
-   const {lectureId} = req.body.id || req.params.id // PROBLEM: This destructures `lectureId` from a string (`req.body.id` or `req.params.id`), which will always be `undefined`. Should be `const lectureId = req.body.id || req.params.id`. Also, the deleted lecture is not removed from the parent Course's `lectures` array — orphaned reference will remain.
-   const userId = req.user._id // PROBLEM: `req.user._id` may not exist. The auth middleware sets `req.user = userDetails` from JWT payload which has `id`, not `_id`. Should be `req.user.id`. Also, `userId` is declared but never used in this function.
+   const lectureId = req.body.id || req.params.id
+   const userId = req.user.id 
 
    const lecture = await Lecture.findByIdAndDelete({_id: lectureId})
    if(!lecture){
