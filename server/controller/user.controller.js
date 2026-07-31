@@ -100,6 +100,7 @@ export const coursesList = asyncHandler(async (req, res) => {
 			page,
 			totalCourse,
 			totalPage: Math.ceil(totalCourse / limit), 
+		}
 	});
 });
 

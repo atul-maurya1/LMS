@@ -1,7 +1,7 @@
 import express from 'express'
 
 const userRoutes = express.Router()
-import isLoggedIn from '../middlewares/auth.middleware.js'
+import {isLoggedIn} from '../middlewares/auth.middleware.js'
 
 
 import {

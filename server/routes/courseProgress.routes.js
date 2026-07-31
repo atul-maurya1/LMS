@@ -1,7 +1,7 @@
 import express from 'express'
 
 const courseProgressRoutes = express.Router()
-import isLoggedIn from '../middlewares/auth.middleware.js'
+import {isLoggedIn} from '../middlewares/auth.middleware.js'
 
 import {lectureProgress, courseProgress} from '../controller/courseProgress.controller.js'
 

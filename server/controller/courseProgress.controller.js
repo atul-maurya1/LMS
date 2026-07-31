@@ -17,7 +17,7 @@ export const lectureProgress = asyncHandler(async (req, res) => {
         user: userId,
         course: courseId
       })
-
+ 
   
     if(!lectureProgress){
       lectureProgress = await LectureProgress.create({
@@ -76,7 +76,7 @@ export const lectureProgress = asyncHandler(async (req, res) => {
     const totalLectureCompleted = courseProgress?.lectureProgress.filter((lp) => lp.isCompleted === true).length
     const courseCompletionPercentage = totalLectures > 0 ? Math.round(((totalLectureCompleted / totalLectures) * 100)): 0 
 
-    courseProgress?.completionPercentage  = courseCompletionPercentage 
+    courseProgress.completionPercentage = courseCompletionPercentage 
     await courseProgress.save()
 
     return res.status(200).json({
